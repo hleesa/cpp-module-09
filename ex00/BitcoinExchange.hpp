@@ -1,0 +1,11 @@
+
+#ifndef CPP_HLEESA_BITCOINEXCHANGE_HPP
+#define CPP_HLEESA_BITCOINEXCHANGE_HPP
+
+
+class BitcoinExchange {
+
+};
+
+
+#endif //CPP_HLEESA_BITCOINEXCHANGE_HPP
