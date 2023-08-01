@@ -11,9 +11,19 @@ typedef std::pair<std::string, double> dateValuePair;
 class BitcoinExchange {
 
 private:
-    std::queue <dateValuePair> inputData;
+    BitcoinExchange();
+
+    BitcoinExchange(const BitcoinExchange& other);
+
+    BitcoinExchange& operator=(const BitcoinExchange& other);
+
+    ~BitcoinExchange();
 
 public:
+
+    static std::queue <dateValuePair> loadFile(const std::string filename);
+
+    static void printBitcoinValue();
 
 
 };
