@@ -28,11 +28,15 @@ std::queue <dateValuePair> BitcoinExchange::loadFile(const std::string filename)
         }
         while (getline(file, line)) {
             size_t delimPos = line.find(delimiter.front());
-            std::string date = line.substr(0, delimPos - 1); // 두 파일을 분리해야 할까? 예외 데이터 처리를 어떻게 해야 하나?
-            std::stringstream ss(line.substr(delimPos + 1));
-            double value;
-            ss >> value;
-            ret.push(std::make_pair(date, value));
+            dateValuePair dataValue = std::make_pair(std::string(), std::string());
+            if (delimPos == std::string::npos) {
+                dataValue.first = line;
+            }
+            else {
+                dataValue.first = line.substr(0, delimPos);
+                dataValue.second = line.substr(delimPos + 1);
+            }
+            ret.push(dataValue);
         }
     }
     return ret;
@@ -42,12 +46,40 @@ void BitcoinExchange::printBitcoinValue() {
     std::queue <dateValuePair> database = loadFile("data.csv");
     std::queue <dateValuePair> inputData = loadFile("input.txt");
 
+    /*
+
     while (!database.empty()) {
-        std::cout << database.front().first << " " << database.front().second << '\n';
+        std::cout << database.front().first << "\n" << database.front().second << '\n';
         database.pop();
     }
-    while(!inputData.empty()) {
-        std::cout << inputData.front().first << " " << inputData.front().second << '\n';
+    while (!inputData.empty()) {
+        std::cout << inputData.front().first << "\n" << inputData.front().second << '\n';
         inputData.pop();
     }
+     */
+
+    while (!inputData.empty()) {
+        std::stringstream ss(inputData.front().second);
+        double value;
+        if (ss >> value){
+            if (value < 0.0) {
+                std::cout << "Error: not a positive number.\n";
+            }
+            else if (value > 1000.0) {
+                std::cout << "Error: too large a number.\n";
+            }
+            else {
+                std::cout << value << '\n';
+            }
+        }
+        else {
+            std::cout << "Error bad input => \n";   // 내용 구체화? cerr?
+        }
+        inputData.pop();
+    }
+
+    /**
+     * 날짜 비교?
+     *
+     */
 }

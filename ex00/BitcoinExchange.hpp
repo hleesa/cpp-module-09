@@ -6,7 +6,7 @@
 #include <string>
 #include <utility>
 
-typedef std::pair<std::string, double> dateValuePair;
+typedef std::pair <std::string, std::string> dateValuePair;
 
 class BitcoinExchange {
 
