@@ -1,6 +1,6 @@
 
-#ifndef CPP_HLEESA_BITCOINEXCHANGE_HPP
-#define CPP_HLEESA_BITCOINEXCHANGE_HPP
+#ifndef BITCOINEXCHANGE_HPP
+#define BITCOINEXCHANGE_HPP
 
 #include <queue>
 #include <string>
@@ -28,4 +28,4 @@ public:
 };
 
 
-#endif //CPP_HLEESA_BITCOINEXCHANGE_HPP
+#endif //BITCOINEXCHANGE_HPP
