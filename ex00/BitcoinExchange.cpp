@@ -4,6 +4,22 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <map>
+
+BitcoinExchange::BitcoinExchange() {
+}
+
+BitcoinExchange::BitcoinExchange(const BitcoinExchange& other) {
+    (void) other;
+}
+
+BitcoinExchange& BitcoinExchange::operator=(const BitcoinExchange& other) {
+    (void) other;
+    return *this;
+}
+
+BitcoinExchange::~BitcoinExchange() {
+}
 
 std::queue <dateValuePair> BitcoinExchange::loadFile(const std::string filename) {
     std::ifstream file(filename.c_str());
@@ -42,44 +58,82 @@ std::queue <dateValuePair> BitcoinExchange::loadFile(const std::string filename)
     return ret;
 }
 
-void BitcoinExchange::printBitcoinValue() {
-    std::queue <dateValuePair> database = loadFile("data.csv");
-    std::queue <dateValuePair> inputData = loadFile("input.txt");
-
-    /*
-
-    while (!database.empty()) {
-        std::cout << database.front().first << "\n" << database.front().second << '\n';
-        database.pop();
+bool isValidDate(const std::string date) {
+    std::stringstream ss(date);
+    int year, month, day;
+    char delim1, delim2;
+    ss >> year;
+    ss >> delim1;
+    ss >> month;
+    ss >> delim2;
+    ss >> day;
+    if (year < 0 || month < 0 || delim2 < 0 || delim1 != '-' || delim2 != '-') {
+        return false;
     }
-    while (!inputData.empty()) {
-        std::cout << inputData.front().first << "\n" << inputData.front().second << '\n';
-        inputData.pop();
+    int maxDays[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0))
+        maxDays[2] = 29;
+    if (day > maxDays[month]) {
+        return false;
     }
-     */
+    return true;
+}
 
-    while (!inputData.empty()) {
-        std::stringstream ss(inputData.front().second);
-        double value;
-        if (ss >> value){
-            if (value < 0.0) {
-                std::cout << "Error: not a positive number.\n";
+void fillDatabase(std::map<std::string, double>& database) {
+    std::queue <dateValuePair> dataset = BitcoinExchange::loadFile("data.csv");
+    while (!dataset.empty()) {
+        try {
+            dateValuePair cur = dataset.front();
+            dataset.pop();
+            std::stringstream ss(cur.second);
+            double exchangeRate;
+            if (!(ss >> exchangeRate)) {
+                throw std::invalid_argument("invalid number => " + cur.second);
             }
-            else if (value > 1000.0) {
-                std::cout << "Error: too large a number.\n";
+            database.insert(std::pair<std::string, double>(cur.first, exchangeRate));
+        } catch (std::exception& e) {
+            std::cout << "Error: " << e.what() << '\n';
+        }
+    }
+    return;
+}
+
+void BitcoinExchange::printBitcoinValue(const std::string inputFile) {
+
+    std::map<std::string, double> database;
+    fillDatabase(database);
+    std::queue <dateValuePair> inputData = loadFile(inputFile);
+
+    while (!inputData.empty()) {
+        try {
+            dateValuePair curData = inputData.front();
+            inputData.pop();
+            if (!isValidDate(curData.first)) {
+                throw std::invalid_argument("bad input => " + curData.first);
+            }
+            std::stringstream ss(curData.second);
+            double value;
+            if (ss >> value) {
+                if (value < 0.0) {
+                    throw std::invalid_argument("not a positive number.");
+                }
+                else if (value > 1000.0) {
+                    throw std::invalid_argument("too large a number.");
+                }
+                else {
+                    std::map<std::string, double>::iterator it = database.lower_bound(curData.first);
+                    if (it->first != curData.first) {
+                        --it;
+                    }
+                    std::cout << curData.first << "=> " << value << " = " << value * it->second << '\n';
+                }
             }
             else {
-                std::cout << value << '\n';
+                throw std::invalid_argument("bad input => " + curData.second);
             }
+        } catch (std::exception& e) {
+            std::cout << "Error: " << e.what() << '\n';
         }
-        else {
-            std::cout << "Error bad input => \n";   // 내용 구체화? cerr?
-        }
-        inputData.pop();
     }
-
-    /**
-     * 날짜 비교?
-     *
-     */
+    return;
 }

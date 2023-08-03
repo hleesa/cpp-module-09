@@ -23,8 +23,7 @@ public:
 
     static std::queue <dateValuePair> loadFile(const std::string filename);
 
-    static void printBitcoinValue();
-
+    static void printBitcoinValue(const std::string inputFile);
 
 };
 
