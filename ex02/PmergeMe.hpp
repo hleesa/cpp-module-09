@@ -2,6 +2,8 @@
 #ifndef CPP_HLEESA_PMERGEME_HPP
 #define CPP_HLEESA_PMERGEME_HPP
 
+#include <algorithm>
+#include <iostream>
 
 class PmergeMe {
 
@@ -20,37 +22,33 @@ private:
         int leftSize = mid - left + 1;
         int rightSize = right - mid;
 
-        T leftContainer(leftSize);
-        T rightContainer(rightSize);
-        for (int i = 0; i < leftSize; ++i) {
-            leftContainer[i] = container[left + i];
-        }
-        for (int i = 0; i < rightSize; ++i) {
-            rightContainer[i] = container[mid + 1 + i];
-        }
+        typename T::iterator leftContainerBegin = container.begin();
+        std::advance(leftContainerBegin, left);
+        typename T::iterator leftContainerEnd = leftContainerBegin;
+        std::advance(leftContainerEnd, leftSize);
 
-        int i = 0, j = 0, k = left;
-        while (i < leftSize && j < rightSize) {
-            if (leftContainer[i] <= rightContainer[j]) {
-                container[k] = leftContainer[i];
-                ++i;
-            }
-            else {
-                container[k] = rightContainer[j];
-                ++j;
-            }
-            ++k;
+        typename T::iterator rightContainerBegin = container.begin();
+        std::advance(rightContainerBegin, mid + 1);
+        typename T::iterator rightContainerEnd = rightContainerBegin;
+        std::advance(rightContainerEnd, rightSize);
+
+        T leftContainer(leftContainerBegin, leftContainerEnd);
+        T rightContainer(rightContainerBegin, rightContainerEnd);
+
+        typename T::iterator lIt;
+        typename T::iterator rIt;
+        for (rIt = rightContainer.begin(); rIt != rightContainer.end(); ++rIt) {
+            lIt = std::lower_bound(leftContainer.begin(), leftContainer.end(), *rIt);
+            leftContainer.insert(lIt, *rIt);
         }
-        while (i < leftSize) {
-            container[k++] = leftContainer[i++];
-        }
-        while (j < rightSize) {
-            container[k++] = rightContainer[j++];
+        typename T::iterator it = container.begin();
+        std::advance(it, left);
+        for (lIt = leftContainer.begin(); lIt != leftContainer.end(); ++it, ++lIt) {
+            *it = *lIt;
         }
     }
 
 public:
-
     template<typename T>
     static void mergeInsertSort(T& container, int left, int right) {
         if (left < right) {
