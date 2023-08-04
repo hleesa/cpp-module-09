@@ -27,7 +27,6 @@ std::queue <dateValuePair> BitcoinExchange::loadFile(const std::string filename)
         std::cerr << "Error: Failed to open file '" << filename << "'" << std::endl;
         return std::queue<dateValuePair>();
     }
-
     std::queue <dateValuePair> ret;
     std::queue<char> delimiter;
     std::string line;
@@ -42,7 +41,7 @@ std::queue <dateValuePair> BitcoinExchange::loadFile(const std::string filename)
             file.close();
             return std::queue<dateValuePair>();
         }
-        while (getline(file, line)) {
+        while (std::getline(file, line)) {
             size_t delimPos = line.find(delimiter.front());
             dateValuePair dataValue = std::make_pair(std::string(), std::string());
             if (delimPos == std::string::npos)
@@ -62,12 +61,9 @@ bool isValidDate(const std::string date) {
     std::stringstream ss(date);
     int year, month, day;
     char delim1, delim2;
-    ss >> year;
-    ss >> delim1;
-    ss >> month;
-    ss >> delim2;
-    ss >> day;
-    if (year < 0 || month < 0 || delim2 < 0 || delim1 != '-' || delim2 != '-')
+    if (!(ss >> year) || !(ss >> delim1) || !(ss >> month) || !(ss >> delim2) || !(ss >> day))
+        return false;
+    else if (year < 0 || month < 0 || month > 12 || delim2 < 0 || delim1 != '-' || delim2 != '-')
         return false;
     int maxDays[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
     if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0))
@@ -100,7 +96,6 @@ void BitcoinExchange::printBitcoinValue(const std::string inputFile) {
     std::map<std::string, double> database;
     fillDatabase(database);
     std::queue <dateValuePair> inputData = loadFile(inputFile);
-
     while (!inputData.empty()) {
         try {
             dateValuePair curData = inputData.front();
