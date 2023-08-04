@@ -1,6 +1,6 @@
 
-#ifndef CPP_HLEESA_PMERGEME_HPP
-#define CPP_HLEESA_PMERGEME_HPP
+#ifndef PMERGEME_HPP
+#define PMERGEME_HPP
 
 #include <algorithm>
 #include <iostream>
@@ -63,4 +63,4 @@ public:
 };
 
 
-#endif //CPP_HLEESA_PMERGEME_HPP
+#endif //PMERGEME_HPP
