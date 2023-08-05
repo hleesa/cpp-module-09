@@ -1,7 +1,6 @@
 
 #include "PmergeMe.hpp"
 #include <iostream>
-#include <vector>
 #include <list>
 #include <deque>
 #include <stdexcept>
@@ -12,11 +11,11 @@ std::deque<int> toDeque(int argc, char* argv[]) {
         throw std::invalid_argument("Error");
     std::deque<int> ret(argc - 1);
     int value;
-    for (int i = 1; i < argc; ++i) {
-        std::stringstream ss(argv[i]);
+    for (int i = 0; i + 1 < argc; ++i) {
+        std::stringstream ss(argv[i + 1]);
         if (!(ss >> value) || value < 1)
             throw std::invalid_argument("Error");
-        ret[i - 1] = value;
+        ret[i] = value;
     }
     return ret;
 }

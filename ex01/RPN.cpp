@@ -3,6 +3,7 @@
 #include <stack>
 #include <iostream>
 #include <stdexcept>
+#include <stdlib.h>
 
 RPN::RPN() {
 }
@@ -54,7 +55,7 @@ long RPN::calculate(std::string expression) {
     for (size_t i = 0; i < expression.size(); ++i) {
         char c = expression[i];
         if (isdigit(c))
-            acc.push(static_cast<long>(c - '0'));
+            acc.push(atol(&c));
         else if (isOp(c))
             applyOp(acc, c);
         else if (!isspace(c))

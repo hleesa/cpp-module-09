@@ -6,6 +6,7 @@
 #include <iostream>
 #include <deque>
 #include <sys/time.h>
+#include <stdexcept>
 
 class PmergeMe {
 
@@ -61,6 +62,8 @@ public:
             mergeInsertSort(container, mid + 1, right);
             merge(container, left, mid, right);
         }
+        else if (left < 0 || right >= static_cast<int>(container.size()))
+            throw std::invalid_argument("Error");
         gettimeofday(&endTime, NULL);
         return (endTime.tv_sec - startTime.tv_sec) * 1000000 + (endTime.tv_usec - startTime.tv_usec);
     }
