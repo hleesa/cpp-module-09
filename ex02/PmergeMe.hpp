@@ -4,6 +4,8 @@
 
 #include <algorithm>
 #include <iostream>
+#include <deque>
+#include <sys/time.h>
 
 class PmergeMe {
 
@@ -50,17 +52,18 @@ private:
 
 public:
     template<typename T>
-    static void mergeInsertSort(T& container, int left, int right) {
+    static long mergeInsertSort(T& container, int left, int right) {
+        struct timeval startTime, endTime;
+        gettimeofday(&startTime, NULL);
         if (left < right) {
-            int mid = (left + right) / 2;
+            int mid = left + (right - left) / 2;
             mergeInsertSort(container, left, mid);
             mergeInsertSort(container, mid + 1, right);
             merge(container, left, mid, right);
         }
+        gettimeofday(&endTime, NULL);
+        return (endTime.tv_sec - startTime.tv_sec) * 1000000 + (endTime.tv_usec - startTime.tv_usec);
     }
-
-
 };
-
 
 #endif //PMERGEME_HPP
