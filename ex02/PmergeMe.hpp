@@ -56,14 +56,14 @@ public:
     static long mergeInsertSort(T& container, int left, int right) {
         struct timeval startTime, endTime;
         gettimeofday(&startTime, NULL);
-        if (left < right) {
+        if (left < 0 || right >= static_cast<int>(container.size()))
+            throw std::invalid_argument("Error");
+        else if (left < right) {
             int mid = left + (right - left) / 2;
             mergeInsertSort(container, left, mid);
             mergeInsertSort(container, mid + 1, right);
             merge(container, left, mid, right);
         }
-        else if (left < 0 || right >= static_cast<int>(container.size()))
-            throw std::invalid_argument("Error");
         gettimeofday(&endTime, NULL);
         return (endTime.tv_sec - startTime.tv_sec) * 1000000 + (endTime.tv_usec - startTime.tv_usec);
     }
