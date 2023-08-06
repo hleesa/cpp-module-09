@@ -11,7 +11,6 @@
 class PmergeMe {
 
 private:
-
     PmergeMe();
 
     PmergeMe(const PmergeMe& other);

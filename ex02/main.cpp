@@ -5,6 +5,7 @@
 #include <deque>
 #include <stdexcept>
 #include <sstream>
+#include <vector>
 
 std::deque<int> toDeque(int argc, char* argv[]) {
     if (argc == 1)
