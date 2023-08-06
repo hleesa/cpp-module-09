@@ -21,36 +21,35 @@ BitcoinExchange& BitcoinExchange::operator=(const BitcoinExchange& other) {
 BitcoinExchange::~BitcoinExchange() {
 }
 
-std::queue <dateValuePair> BitcoinExchange::loadFile(const std::string filename) {
+std::queue <dateValuePair> BitcoinExchange::loadFile(const std::string filename, const char delim) {
     std::ifstream file(filename.c_str());
     if (!file.is_open()) {
         std::cerr << "Error: Failed to open file '" << filename << "'" << std::endl;
         return std::queue<dateValuePair>();
     }
     std::queue <dateValuePair> ret;
-    std::queue<char> delimiter;
     std::string line;
     if (std::getline(file, line)) {
+        int numOfDelim = 0;
         for (size_t i = 0; i < line.length(); ++i) {
-            char c = line[i];
-            if (c == ',' || c == '|')
-                delimiter.push(c);
+            if (line[i] == delim)
+                ++numOfDelim;
         }
-        if (delimiter.size() != 1) {
+        if (numOfDelim != 1) {
             std::cerr << "Error: Invalid data form '" << filename << "'" << std::endl;
             file.close();
             return std::queue<dateValuePair>();
         }
         while (std::getline(file, line)) {
-            size_t delimPos = line.find(delimiter.front());
-            dateValuePair dataValue = std::make_pair(std::string(), std::string());
+            size_t delimPos = line.find(delim);
+            dateValuePair dateValue = std::make_pair(std::string(), std::string());
             if (delimPos == std::string::npos)
-                dataValue.first = line;
+                dateValue.first = line;
             else {
-                dataValue.first = line.substr(0, delimPos);
-                dataValue.second = line.substr(delimPos + 1);
+                dateValue.first = line.substr(0, delimPos);
+                dateValue.second = line.substr(delimPos + 1);
             }
-            ret.push(dataValue);
+            ret.push(dateValue);
         }
     }
     file.close();
@@ -74,7 +73,7 @@ bool isValidDate(const std::string date) {
 }
 
 void fillDatabase(std::map<std::string, double>& database) {
-    std::queue <dateValuePair> dataset = BitcoinExchange::loadFile("data.csv");
+    std::queue <dateValuePair> dataset = BitcoinExchange::loadFile("data.csv", ',');
     while (!dataset.empty()) {
         try {
             dateValuePair curData = dataset.front();
@@ -92,10 +91,9 @@ void fillDatabase(std::map<std::string, double>& database) {
 }
 
 void BitcoinExchange::printBitcoinValue(const std::string inputFile) {
-
     std::map<std::string, double> database;
     fillDatabase(database);
-    std::queue <dateValuePair> inputData = loadFile(inputFile);
+    std::queue <dateValuePair> inputData = loadFile(inputFile, '|');
     while (!inputData.empty()) {
         try {
             dateValuePair curData = inputData.front();
@@ -111,16 +109,17 @@ void BitcoinExchange::printBitcoinValue(const std::string inputFile) {
                     throw std::invalid_argument("too large a number.");
                 else {
                     std::map<std::string, double>::iterator it = database.lower_bound(curData.first);
-                    if (it == database.begin())
-                        throw std::invalid_argument("bad input => " + curData.first);
-                    else if (it->first != curData.first)
-                        --it;
+                    if (it->first != curData.first) {
+                        if (it == database.begin())
+                            throw std::invalid_argument("bad input => " + curData.first);
+                        else
+                            --it;
+                    }
                     std::cout << curData.first << "=> " << value << " = " << value * it->second << '\n';
                 }
             }
             else
                 throw std::invalid_argument("bad input => " + curData.second);
-
         } catch (std::exception& e) {
             std::cerr << "Error: " << e.what() << '\n';
         }

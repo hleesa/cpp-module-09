@@ -20,8 +20,7 @@ private:
     ~BitcoinExchange();
 
 public:
-
-    static std::queue <dateValuePair> loadFile(const std::string filename);
+    static std::queue <dateValuePair> loadFile(const std::string filename, const char delim);
 
     static void printBitcoinValue(const std::string inputFile);
 
