@@ -7,16 +7,15 @@
 #include <sstream>
 #include <vector>
 
-std::deque<int> toDeque(int argc, char* argv[]) {
-    if (argc == 1)
-        throw std::invalid_argument("Error");
-    std::deque<int> ret(argc - 1);
+template<typename Container>
+Container argvToContainer(int argc, char* argv[]) {
+    Container ret;
     int value;
     for (int i = 0; i + 1 < argc; ++i) {
         std::stringstream ss(argv[i + 1]);
-        if (!(ss >> value) || value < 1)
+        if (!(ss >> value) || (value < 1))
             throw std::invalid_argument("Error");
-        ret[i] = value;
+        ret.push_back(value);
     }
     return ret;
 }
@@ -37,14 +36,16 @@ void printTime(const size_t size, const std::string containerName, const long ti
 
 int main(int argc, char* argv[]) {
     try {
-        std::deque<int> deque = toDeque(argc, argv);
-        std::list<int> list(deque.begin(), deque.end());
-        printContainer("Before: ", deque);
-        long t1 = PmergeMe::mergeInsertSort(deque, 0, deque.size() - 1);
+        if (argc == 1)
+            throw std::invalid_argument("Enter positive integer sequence.");
+        std::vector<int> vector = argvToContainer<std::vector<int> >(argc, argv);
+        std::list<int> list(vector.begin(), vector.end());
+        printContainer("Before: ", vector);
+        long t1 = PmergeMe::mergeInsertSort(vector, 0, vector.size() - 1);
         long t2 = PmergeMe::mergeInsertSort(list, 0, list.size() - 1);
         printContainer("After:  ", list);
-        printTime(deque.size(), "deque   ", t1);
-        printTime(list.size(), "list    ", t2);
+        printTime(vector.size(),    "vector ", t1);
+        printTime(list.size(),      "list   ", t2);
     } catch (std::exception& e) {
         std::cout << e.what() << '\n';
     }
