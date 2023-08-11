@@ -24,8 +24,7 @@ BitcoinExchange::~BitcoinExchange() {
 std::queue <dateValuePair> BitcoinExchange::loadFile(const std::string filename, const char delim) {
     std::ifstream file(filename.c_str());
     if (!file.is_open()) {
-        std::cerr << "Error: Failed to open file '" << filename << "'" << std::endl;
-        return std::queue<dateValuePair>();
+        throw std::invalid_argument("Failed to open file '" + filename + "'");
     }
     std::queue <dateValuePair> ret;
     std::string line;
@@ -36,9 +35,8 @@ std::queue <dateValuePair> BitcoinExchange::loadFile(const std::string filename,
                 ++numOfDelim;
         }
         if (numOfDelim != 1) {
-            std::cerr << "Error: Invalid data form '" << filename << "'" << std::endl;
             file.close();
-            return std::queue<dateValuePair>();
+            throw std::invalid_argument("Invalid data form '" + filename + "'");
         }
         while (std::getline(file, line)) {
             size_t delimPos = line.find(delim);
@@ -73,7 +71,12 @@ bool isValidDate(const std::string date) {
 }
 
 void fillDatabase(std::map<std::string, double>& database) {
-    std::queue <dateValuePair> dataset = BitcoinExchange::loadFile("data.csv", ',');
+    std::queue <dateValuePair> dataset;
+    try {
+        dataset = BitcoinExchange::loadFile("data.csv", ',');
+    } catch (std::exception& e) {
+        std::cerr << "Error: " << e.what() << '\n';
+    }
     while (!dataset.empty()) {
         try {
             dateValuePair curData = dataset.front();
@@ -93,33 +96,40 @@ void fillDatabase(std::map<std::string, double>& database) {
 void BitcoinExchange::printBitcoinValue(const std::string inputFile) {
     std::map<std::string, double> database;
     fillDatabase(database);
-    std::queue <dateValuePair> inputData = loadFile(inputFile, '|');
+    std::queue <dateValuePair> inputData;
+    try {
+        inputData = loadFile(inputFile, '|');
+    } catch (std::exception& e) {
+        std::cerr << "Error: " << e.what() << '\n';
+    }
     while (!inputData.empty()) {
         try {
             dateValuePair curData = inputData.front();
             inputData.pop();
-            if (!isValidDate(curData.first))
-                throw std::invalid_argument("bad input => " + curData.first);
-            std::stringstream ss(curData.second);
-            double value;
-            if (ss >> value) {
-                if (value < 0.0)
-                    throw std::invalid_argument("not a positive number.");
-                else if (value > 1000.0)
-                    throw std::invalid_argument("too large a number.");
-                else {
-                    std::map<std::string, double>::iterator it = database.lower_bound(curData.first);
-                    if (it->first != curData.first) {
-                        if (it == database.begin())
-                            throw std::invalid_argument("bad input => " + curData.first);
-                        else
-                            --it;
+            if (isValidDate(curData.first)) {
+                std::stringstream ss(curData.second);
+                double value;
+                if (ss >> value) {
+                    if (value < 0.0)
+                        throw std::invalid_argument("not a positive number.");
+                    else if (value > 1000.0)
+                        throw std::invalid_argument("too large a number.");
+                    else {
+                        std::map<std::string, double>::iterator it = database.lower_bound(curData.first);
+                        if (it->first != curData.first) {
+                            if (it == database.begin())
+                                throw std::invalid_argument("bad input => " + curData.first);
+                            else
+                                --it;
+                        }
+                        std::cout << curData.first << "=> " << value << " = " << value * it->second << '\n';
                     }
-                    std::cout << curData.first << "=> " << value << " = " << value * it->second << '\n';
                 }
+                else
+                    throw std::invalid_argument("bad input => " + curData.first + curData.second);
             }
             else
-                throw std::invalid_argument("bad input => " + curData.second);
+                throw std::invalid_argument("bad input => " + curData.first);
         } catch (std::exception& e) {
             std::cerr << "Error: " << e.what() << '\n';
         }
