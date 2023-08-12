@@ -19,31 +19,31 @@ private:
 
     ~PmergeMe();
 
-    template<typename T>
-    static void merge(T& container, int left, int mid, int right) {
+    template<typename Container>
+    static void merge(Container& container, int left, int mid, int right) {
         int leftSize = mid - left + 1;
         int rightSize = right - mid;
 
-        typename T::iterator leftContainerBegin = container.begin();
+        typename Container::iterator leftContainerBegin = container.begin();
         std::advance(leftContainerBegin, left);
-        typename T::iterator leftContainerEnd = leftContainerBegin;
+        typename Container::iterator leftContainerEnd = leftContainerBegin;
         std::advance(leftContainerEnd, leftSize);
 
-        typename T::iterator rightContainerBegin = container.begin();
+        typename Container::iterator rightContainerBegin = container.begin();
         std::advance(rightContainerBegin, mid + 1);
-        typename T::iterator rightContainerEnd = rightContainerBegin;
+        typename Container::iterator rightContainerEnd = rightContainerBegin;
         std::advance(rightContainerEnd, rightSize);
 
-        T leftContainer(leftContainerBegin, leftContainerEnd);
-        T rightContainer(rightContainerBegin, rightContainerEnd);
+        Container leftContainer(leftContainerBegin, leftContainerEnd);
+        Container rightContainer(rightContainerBegin, rightContainerEnd);
 
-        typename T::iterator lIt;
-        typename T::iterator rIt;
+        typename Container::iterator lIt;
+        typename Container::iterator rIt;
         for (rIt = rightContainer.begin(); rIt != rightContainer.end(); ++rIt) {
             lIt = std::lower_bound(leftContainer.begin(), leftContainer.end(), *rIt);
             leftContainer.insert(lIt, *rIt);
         }
-        typename T::iterator it = container.begin();
+        typename Container::iterator it = container.begin();
         std::advance(it, left);
         for (lIt = leftContainer.begin(); lIt != leftContainer.end(); ++it, ++lIt) {
             *it = *lIt;
@@ -51,8 +51,8 @@ private:
     }
 
 public:
-    template<typename T>
-    static long mergeInsertSort(T& container, int left, int right) {
+    template<typename Container>
+    static long mergeInsertSort(Container& container, int left, int right) {
         struct timeval startTime, endTime;
         gettimeofday(&startTime, NULL);
         if (left < 0 || right >= static_cast<int>(container.size()))
