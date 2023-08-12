@@ -25,12 +25,12 @@ bool isOperator(const char c) {
     return ops.find(c) != std::string::npos;
 }
 
-void applyOperator(std::stack<long>& acc, const char op) {
+void applyOperator(std::stack<double>& acc, const char op) {
     if (acc.size() < 2)
         throw std::invalid_argument("lack of number");
-    long rhs = acc.top(); acc.pop();
-    long lhs = acc.top(); acc.pop();
-    long result;
+    double rhs = acc.top(); acc.pop();
+    double lhs = acc.top(); acc.pop();
+    double result;
     switch (op) {
         case '+':
             result = lhs + rhs;
@@ -51,12 +51,12 @@ void applyOperator(std::stack<long>& acc, const char op) {
     acc.push(result);
 }
 
-long RPN::calculate(std::string expression) {
-    std::stack<long> acc;
+double RPN::calculate(std::string expression) {
+    std::stack<double> acc;
     for (size_t i = 0; i < expression.size(); ++i) {
         char c = expression[i];
         if (isdigit(c))
-            acc.push(atol(&c));
+            acc.push(atoi(&c));
         else if (isOperator(c))
             applyOperator(acc, c);
         else if (!isspace(c))

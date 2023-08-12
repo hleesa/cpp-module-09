@@ -15,7 +15,7 @@ private:
 
     ~RPN();
 
-    static long calculate(std::string expression);
+    static double calculate(std::string expression);
 
 public:
     static void printAnswer(const char* arg);
