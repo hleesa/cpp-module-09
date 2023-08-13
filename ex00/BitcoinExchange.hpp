@@ -2,9 +2,10 @@
 #ifndef BITCOINEXCHANGE_HPP
 #define BITCOINEXCHANGE_HPP
 
-#include <queue>
+#include <deque>
 #include <string>
 #include <utility>
+
 
 typedef std::pair <std::string, std::string> dateValuePair;
 
@@ -20,7 +21,9 @@ private:
     ~BitcoinExchange();
 
 public:
-    static std::queue <dateValuePair> loadFile(const std::string filename, const char delim);
+    static std::deque <dateValuePair> loadDatabase(const std::string filename, const std::string fileFormat, const char delim);
+
+    static std::deque <dateValuePair> loadInputFile(const std::string filename, const std::string fileFormat, const char delim);
 
     static void printBitcoinValue(const std::string inputFile);
 
