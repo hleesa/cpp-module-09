@@ -2,7 +2,6 @@
 #include "PmergeMe.hpp"
 #include <iostream>
 #include <list>
-#include <deque>
 #include <stdexcept>
 #include <sstream>
 #include <vector>
