@@ -4,16 +4,15 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <map>
 
 BitcoinExchange::BitcoinExchange() {
 }
 
-BitcoinExchange::BitcoinExchange(const BitcoinExchange& other) {
+BitcoinExchange::BitcoinExchange(const BitcoinExchange &other) {
     (void) other;
 }
 
-BitcoinExchange& BitcoinExchange::operator=(const BitcoinExchange& other) {
+BitcoinExchange &BitcoinExchange::operator=(const BitcoinExchange &other) {
     (void) other;
     return *this;
 }
@@ -22,11 +21,11 @@ BitcoinExchange::~BitcoinExchange() {
 }
 
 std::deque<dateValuePair>
-BitcoinExchange::loadDatabase(const std::string filename, const std::string fileFormat, const char delim) {
+BitcoinExchange::readDatabase(const std::string filename, const std::string fileFormat, const char delim) {
+    std::deque<dateValuePair> dataset;
     std::ifstream file(filename.c_str());
     if (!file.is_open())
         throw std::invalid_argument("Failed to open file '" + filename + "'");
-    std::deque<dateValuePair> ret;
     std::string line;
     if (std::getline(file, line)) {
         if (line != fileFormat) {
@@ -40,15 +39,14 @@ BitcoinExchange::loadDatabase(const std::string filename, const std::string file
         if (delimPos == std::string::npos) {
             file.close();
             throw std::invalid_argument("Invalid data type '" + filename + "'");
-        }
-        else {
+        } else {
             dateValue.first = line.substr(0, delimPos);
             dateValue.second = line.substr(delimPos + 1);
         }
-        ret.push_back(dateValue);
+        dataset.push_back(dateValue);
     }
     file.close();
-    return ret;
+    return dataset;
 }
 
 bool isValidDate(const std::string date) {
@@ -67,8 +65,10 @@ bool isValidDate(const std::string date) {
     return true;
 }
 
-void fillDatabase(std::map<std::string, double, std::greater<std::string> >& database) {
-    std::deque<dateValuePair> dataset = BitcoinExchange::loadDatabase("data.csv", "date,exchange_rate", ',');
+std::map<std::string, double, std::greater<std::string> >
+BitcoinExchange::loadDatabase(const std::string filename, const std::string fileFormat, const char delim) {
+    std::map<std::string, double, std::greater<std::string> > database;
+    std::deque<dateValuePair> dataset = readDatabase(filename, fileFormat, delim);
     std::deque<dateValuePair>::iterator it;
     for (it = dataset.begin(); it != dataset.end(); ++it) {
         if (!isValidDate(it->first))
@@ -80,15 +80,16 @@ void fillDatabase(std::map<std::string, double, std::greater<std::string> >& dat
             throw std::invalid_argument("Invalid data type in the database: " + it->second);
         database.insert(std::pair<std::string, double>(it->first, exchangeRate));
     }
-    return;
+    return database;
 }
 
 std::deque<dateValuePair>
-BitcoinExchange::loadInputFile(const std::string filename, const std::string fileFormat, const char delim) {
+BitcoinExchange::readInputFile(const std::string filename, const std::string fileFormat, const char delim) {
+    std::deque<dateValuePair> dataset;
     std::ifstream file(filename.c_str());
-    if (!file.is_open())
+    if (!file.is_open()) {
         throw std::invalid_argument("Failed to open file '" + filename + "'");
-    std::deque<dateValuePair> ret;
+    }
     std::string line;
     if (std::getline(file, line)) {
         if (line != fileFormat) {
@@ -101,15 +102,14 @@ BitcoinExchange::loadInputFile(const std::string filename, const std::string fil
         dateValuePair dateValue = std::make_pair(std::string(), std::string());
         if (delimPos == std::string::npos) {
             dateValue.first = line;
-        }
-        else {
+        } else {
             dateValue.first = line.substr(0, delimPos);
             dateValue.second = line.substr(delimPos + 1);
         }
-        ret.push_back(dateValue);
+        dataset.push_back(dateValue);
     }
     file.close();
-    return ret;
+    return dataset;
 }
 
 double getBitcoinValue(const std::string exchangeRate) {
@@ -120,7 +120,7 @@ double getBitcoinValue(const std::string exchangeRate) {
         throw std::invalid_argument("bad input => " + exchangeRate);
     else if (ss >> dum)
         throw std::invalid_argument("bad input => " + std::string(&dum, 1));
-    if (value < 0.0)
+    else if (value < 0.0)
         throw std::invalid_argument("not a positive number.");
     else if (value > 1000.0)
         throw std::invalid_argument("too large a number.");
@@ -128,11 +128,10 @@ double getBitcoinValue(const std::string exchangeRate) {
 }
 
 void BitcoinExchange::printBitcoinValue(const std::string inputFile) {
-    std::map<std::string, double, std::greater<std::string> > database;
-    fillDatabase(database);
-    std::deque<dateValuePair> inputData = loadInputFile(inputFile, "date | value", '|');
+    std::map<std::string, double, std::greater<std::string> > database = loadDatabase("data.csv", "date,exchange_rate",',');
+    std::deque<dateValuePair> inputDataSet = readInputFile(inputFile, "date | value", '|');
     std::deque<dateValuePair>::iterator inputIt;
-    for (inputIt = inputData.begin(); inputIt != inputData.end(); ++inputIt) {
+    for (inputIt = inputDataSet.begin(); inputIt != inputDataSet.end(); ++inputIt) {
         try {
             if (!isValidDate(inputIt->first))
                 throw std::invalid_argument("bad input => " + inputIt->first);
@@ -143,7 +142,7 @@ void BitcoinExchange::printBitcoinValue(const std::string inputFile) {
             else {
                 std::cout << inputIt->first << "=> " << value << " = " << value * foundDatabaseIt->second << '\n';
             }
-        } catch (std::exception& e) {
+        } catch (std::exception &e) {
             std::cerr << "Error: " << e.what() << '\n';
         }
     }
