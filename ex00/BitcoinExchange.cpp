@@ -139,9 +139,8 @@ void BitcoinExchange::printBitcoinValue(const std::string inputFile) {
             std::map<std::string, double>::iterator foundDatabaseIt = database.lower_bound(inputIt->first);
             if (foundDatabaseIt == database.end())
                 throw std::invalid_argument("bad input => " + inputIt->first);
-            else {
+            else
                 std::cout << inputIt->first << "=> " << value << " = " << value * foundDatabaseIt->second << '\n';
-            }
         } catch (std::exception &e) {
             std::cerr << "Error: " << e.what() << '\n';
         }
